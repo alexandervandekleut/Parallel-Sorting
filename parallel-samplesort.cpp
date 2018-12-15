@@ -53,19 +53,17 @@ int main(int argc, char *argv[]){
 
 	B = quicksort(B, 0, B.size()); // locally sort chunk
 
-	int samples = (argc == 2) ? std::stoi(argv[1]) : communicationSize; // default to one sample per processor. rounded down to next lowest multiple of the number of processors.
+	int samples = (argc == 2) ? std::stoi(argv[1]) : communicationSize; // default to one sample per processor, otherwise rounded down to next lowest multiple of the number of processors.
 
-	int samplesPerBucket = samples/communicationSize; // get samples per processor
-
-	list s = list(samplesPerBucket);
+	list s = list(samples/communicationSize); // samples per processor
 	for (int i=s.size()-1; i>=0; i--){ // go backwards to sample this way
 		s[i] = B[i*B.size()/s.size()];
 	}
 
-	list S = list(samples); // list of global splitters to choose from
-
-
+	
 	/* Part 2: Collect partitions from processes and partition list */
+
+	list S = list(samples); // list of global splitters to choose from
 
 	MPI_Gather(s.data(), s.size(), MPI_INT, S.data(), s.size(), MPI_INT, 0, MPI_COMM_WORLD); // collect local splitters into global splitters
 
