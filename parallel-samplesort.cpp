@@ -5,6 +5,7 @@
 
 typedef std::vector<int> list;
 
+/* Sequential quicksort routine */
 list quicksort(list &A, int q, int r){
 	if (q<r){
 		int x = A[q];
@@ -45,7 +46,6 @@ int main(int argc, char *argv[]){
 	list A = {22, 7, 13, 18, 2, 17, 1, 14, 20, 6, 10, 24, 15, 9, 21, 3, 16, 19, 23, 4, 11, 12, 5, 8}; // sample list to be sorted
 
 
-
 	/* Part 1: Partition the original list into sublists to make good choices for partitions */
 	list B = list(A.size()/communicationSize); // local partition of list in each processor
 
@@ -63,6 +63,9 @@ int main(int argc, char *argv[]){
 	}
 
 	list S = list(samples); // list of global splitters to choose from
+
+
+	/* Part 2: Collect partitions from processes and partition list */
 
 	MPI_Gather(s.data(), s.size(), MPI_INT, S.data(), s.size(), MPI_INT, 0, MPI_COMM_WORLD); // collect local splitters into global splitters
 
@@ -91,6 +94,8 @@ int main(int argc, char *argv[]){
 			}
 		}
 
+		/* Part 3: Send out partitioned lists to each process */
+
 		for (int i=0; i<communicationSize; i++){ // each process corresponds to a list in partitions
 			list toSend = partitions[i]; // for each process/partition
 			int sendSize = toSend.size(); // get the size
@@ -106,6 +111,8 @@ int main(int argc, char *argv[]){
 	MPI_Recv(recvBuffer.data(), recvSize, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); // fill it 
 
 	recvBuffer = quicksort(recvBuffer, 0 ,recvBuffer.size()); // local sort on partition of array
+
+	/* Part 4: Collect sorted sublists from each process */
 
 	MPI_Send(&recvSize, 1, MPI_INT, 0, 0, MPI_COMM_WORLD); // send back size to expect of sorted partition of array
 	MPI_Send(recvBuffer.data(), recvBuffer.size(), MPI_INT, 0, 1, MPI_COMM_WORLD); // send back sorted partition of array
