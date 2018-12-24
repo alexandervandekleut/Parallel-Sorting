@@ -3,7 +3,7 @@ Common Parallel Sorting Routines written in C++ with OpenMPI/OpenMP.
 
 Compile using:
 ```
-mpicc -std=c++11 <filename> -o <output name>
+mpicc -lc++ -std=c++11 <filename> -o <output name>
 ```
 
 Run using:
